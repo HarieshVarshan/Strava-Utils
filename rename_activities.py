@@ -27,7 +27,7 @@ def fetch_all(session):
     return sorted(acts, key=lambda a: a["start_date"])
 
 
-def run(session, assume_yes=False):
+def run(session):
     print(f"This reads {RENAMES_FILE} (activity_number,new_name); activity_number counts from your first activity.")
     if input(f"Have you updated {RENAMES_FILE} with the activities you want renamed? [y/N] ").lower() != "y":
         return print("Update the file and try again.")
@@ -50,7 +50,7 @@ def run(session, assume_yes=False):
             print(f"#{n} {a['start_date_local'][:16]}  {a['name']!r} -> {new!r}")
     if not plan:
         return print("Nothing to rename.")
-    if not assume_yes and input(f"\nRename {len(plan)} activities? [y/N] ").lower() != "y":
+    if input(f"\nRename {len(plan)} activities? [y/N] ").lower() != "y":
         return print("Aborted.")
     for aid, new in plan:
         session.put(f"{API}/activities/{aid}", data={"name": new}).raise_for_status()

@@ -1,10 +1,9 @@
 """Interactive menu for personal Strava utilities.
 
 Setup: pip install requests python-dotenv; cp .env.example .env and fill it in
-  python strava_utils.py        # confirms before changing anything
-  python strava_utils.py -y     # skip the "Rename N activities?" confirmation
+  python strava_utils.py
 """
-import argparse, json, os, time
+import json, os, time
 from pathlib import Path
 import requests
 from dotenv import load_dotenv
@@ -46,16 +45,13 @@ def session():
     return s
 
 
-# label -> action(session, assume_yes)
+# label -> action(session)
 MENU = {
     "Bulk rename activities": rename_activities.run,
 }
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-y", "--yes", action="store_true", help="skip the final rename confirmation (file check is always asked)")
-    assume_yes = parser.parse_args().yes
     options = list(MENU.items())
     while True:
         print("\nStrava Utils")
@@ -69,7 +65,7 @@ def main():
         if choice == "a":
             authorize()
         elif choice.isdigit() and 1 <= int(choice) <= len(options):
-            options[int(choice) - 1][1](session(), assume_yes)
+            options[int(choice) - 1][1](session())
         else:
             print("Invalid choice.")
 

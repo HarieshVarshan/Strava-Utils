@@ -42,15 +42,9 @@ The script fetches all your activities, shows `#N date 'old name' -> 'new name'`
 
 If you have an extra or missing activity on Strava, every number after it shifts by one. Check the dates and old names in the plan before confirming.
 
-Pass `-y` to skip the final "Rename N activities?" confirmation:
-
-```
-python strava_utils.py -y
-```
-
 ## Adding a feature
 
-Create a module with `run(session, assume_yes=False)` and add one line to `MENU` in `strava_utils.py`. `session` is a `requests.Session` with the auth header already set.
+Create a module with `run(session)` and add one line to `MENU` in `strava_utils.py`. `session` is a `requests.Session` with the auth header already set.
 
 ## Files
 
