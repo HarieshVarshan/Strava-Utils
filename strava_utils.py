@@ -30,16 +30,31 @@ def authorize():
           "&redirect_uri=http://localhost&approval_prompt=force&scope=read,activity:read_all,activity:write"
           % os.environ["STRAVA_CLIENT_ID"])
     code = input("\nPaste the code=... value from the redirected URL: ").strip()
-    token_request(code=code, grant_type="authorization_code")
+    try:
+        token_request(code=code, grant_type="authorization_code")
+    except requests.HTTPError as e:
+        return print(f"Authorization failed ({e.response.status_code}). The code is single-use and expires quickly; try again.")
     print("Authorized.")
 
 
 def session():
+    """Return an authorized session, or None if authorization was declined/failed."""
     if not TOKEN_FILE.exists():
         authorize()
+        if not TOKEN_FILE.exists():
+            return None
     t = json.loads(TOKEN_FILE.read_text())
-    token = t["access_token"] if t["expires_at"] > time.time() + 60 else \
-        token_request(grant_type="refresh_token", refresh_token=t["refresh_token"])
+    if t["expires_at"] > time.time() + 60:
+        token = t["access_token"]
+    else:
+        try:
+            token = token_request(grant_type="refresh_token", refresh_token=t["refresh_token"])
+        except requests.HTTPError as e:
+            print(f"Saved Strava login no longer works ({e.response.status_code}); access may have been revoked.")
+            if input("Re-authorize now? [y/N] ").lower() != "y":
+                return None
+            TOKEN_FILE.unlink()
+            return session()
     s = requests.Session()
     s.headers["Authorization"] = "Bearer " + token
     return s
@@ -57,15 +72,13 @@ def main():
         print("\nStrava Utils")
         for i, (label, _) in enumerate(options, 1):
             print(f"  {i}. {label}")
-        print("  a. Re-authorize with Strava")
         print("  q. Quit")
         choice = input("> ").strip().lower()
         if choice == "q":
             return
-        if choice == "a":
-            authorize()
-        elif choice.isdigit() and 1 <= int(choice) <= len(options):
-            options[int(choice) - 1][1](session())
+        if choice.isdigit() and 1 <= int(choice) <= len(options):
+            if sess := session():
+                options[int(choice) - 1][1](sess)
         else:
             print("Invalid choice.")
 

@@ -21,7 +21,7 @@ Run `strava_utils.py` for an interactive menu; each feature is its own module.
    ```
    python strava_utils.py
    ```
-   On first use it prints an authorization URL. Open it and click **Authorize**. The browser then lands on a `localhost` page that fails to load; that's expected. Copy the value after `code=` from the address bar and paste it into the terminal. Tokens are saved to `.strava_tokens.json` and refreshed automatically.
+   On first use it prints an authorization URL. Open it and click **Authorize**. The browser then lands on a `localhost` page that fails to load; that's expected. Copy the value after `code=` from the address bar and paste it into the terminal. Tokens are saved to `.strava_tokens.json` and refreshed automatically. If the saved login stops working (for example you revoked access in Strava), the script offers to re-authorize.
 
 ## Features
 
@@ -38,7 +38,7 @@ activity_number,new_name
 - `activity_number` is the position in your history, oldest first (1 = your first activity ever).
 - `new_name` is the name to set.
 
-The script fetches all your activities, shows `#N date 'old name' -> 'new name'` for each row, and asks for confirmation before renaming. Activities that already have the target name are skipped, so it's safe to re-run.
+The script first asks whether you've updated `renames.csv`, then fetches all your activities, shows `#N date 'old name' -> 'new name'` for each row, and asks for confirmation before renaming. Activities that already have the target name are skipped, so it's safe to re-run.
 
 If you have an extra or missing activity on Strava, every number after it shifts by one. Check the dates and old names in the plan before confirming.
 
@@ -50,8 +50,9 @@ Create a module with `run(session)` and add one line to `MENU` in `strava_utils.
 
 | File | Purpose |
 | --- | --- |
-| `strava_utils.py` | Menu, OAuth, token refresh |
+| `strava_utils.py` | Menu, OAuth, token refresh, re-authorize on failure |
 | `rename_activities.py` | Bulk rename feature |
 | `renames.csv` | Input for bulk rename |
+| `.env.example` | Template for `.env` |
 | `.env` | Your Client ID/Secret (gitignored) |
 | `.strava_tokens.json` | Saved tokens (gitignored) |
