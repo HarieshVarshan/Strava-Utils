@@ -1,0 +1,3 @@
+.strava_tokens.json
+__pycache__/
+.env
